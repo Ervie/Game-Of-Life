@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f91971b6-b9db-4988-9fea-849df9607ef0</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>GameOfLife.pyw</StartupFile>
+    <StartupFile>Main.pyw</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,7 +22,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="GameOfLife.pyw" />
+    <Compile Include="GameOfLife.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Main.pyw" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
