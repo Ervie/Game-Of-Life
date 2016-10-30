@@ -42,17 +42,20 @@ class GameOfLife(object):
         
         pygame.display.flip()
 
-        running = True
+        self.paused = False
         self.SetRandomState();
         self.DrawCurrentGeneration();
-        while running:
+        while 1:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    pygame.QUIT
+                elif event.type == pygame.KEYDOWN:
+                    self.HandleKeyboardInput(event)
 
-            self.clock.tick(1)
-            self.CalculateNextGeneration()
-            self.DrawCurrentGeneration()
+            if (self.paused == False):
+                self.clock.tick(1)
+                self.CalculateNextGeneration()
+                self.DrawCurrentGeneration()
 
     def InitMatrix(self):
         """Create matrices from calculated rows and colums number"""
@@ -121,9 +124,10 @@ class GameOfLife(object):
     
     def ResetGrid(self):
         """Sets all cells to dead"""
-        for r in range(self.rows):
-            for c in range(self.columns):
+        for r in range(0, self.rows):
+            for c in range(0, self.columns):
                 self.cellMatrix[r][c] = False
+                self.nextGenerationMatrix[r][c] = False
 
     def CalculateNextGeneration(self):
         """Revive or put cells to death depending on neighbour count"""
@@ -170,6 +174,16 @@ class GameOfLife(object):
         elif event.key == pygame.K_r:
             print("Reseting grid.")
             self.ResetGrid()
+        elif event.key == pygame.K_d:
+            print("Randomizing grid.")
+            self.SetRandomState()
+        elif event.key == pygame.K_s:
+            if self.paused == False:
+                print("Game resumed.")
+                self.paused = True
+            else:
+                print("Game stopped")
+                self.paused = False
 
 
 
