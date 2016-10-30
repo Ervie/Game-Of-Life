@@ -4,13 +4,13 @@ import random
 class GameOfLife(object):
     """Main class displaying board and handling events"""
 
-    WINDOW_WIDTH = 1920
-    WINDOW_HEIGHT = 1080
+    WINDOW_WIDTH = 1280
+    WINDOW_HEIGHT = 720
 
     GRID_OFFSET_X = 80
     GRID_OFFSET_Y = 150
 
-    CELL_SIZE = 15
+    CELL_SIZE = 30
 
     BACKGROUND_COLOR = (255, 255, 255)
 
@@ -20,9 +20,13 @@ class GameOfLife(object):
     def __init__(self):
         """Initialize obligatory components"""
        
+        # Matrices with cells
         self.cellMatrix = []
         self.nextGenerationMatrix = []
+
+        # Timer
         self.clock = pygame.time.Clock()
+        self.fps = 10;
 
         # Calculate rows and columns number
         self.rows = round((self.WINDOW_HEIGHT - self.GRID_OFFSET_X - self.GRID_OFFSET_Y) / (self.CELL_SIZE + 1))
@@ -53,7 +57,7 @@ class GameOfLife(object):
                     self.HandleKeyboardInput(event)
 
             if (self.paused == False):
-                self.clock.tick(1)
+                self.clock.tick(self.fps)
                 self.CalculateNextGeneration()
                 self.DrawCurrentGeneration()
 
@@ -129,6 +133,16 @@ class GameOfLife(object):
                 self.cellMatrix[r][c] = False
                 self.nextGenerationMatrix[r][c] = False
 
+    def ChangeSpeed(self, speedUp):
+        """Speed up or slow down generation changing"""
+        if speedUp == True:
+            if (self.fps < 60):
+                self.fps *= 2
+        elif speedUp == False:
+            if (self.fps > 0.2):
+                self.fps /= 2
+        print(self.clock.get_fps())
+
     def CalculateNextGeneration(self):
         """Revive or put cells to death depending on neighbour count"""
         for row in range(0, self.rows):
@@ -184,6 +198,12 @@ class GameOfLife(object):
             else:
                 print("Game stopped")
                 self.paused = False
+        elif event.key == pygame.K_UP:
+            print("Speed up")
+            self.ChangeSpeed(True)
+        elif event.key == pygame.K_DOWN:
+            print("Slow down")
+            self.ChangeSpeed(False)
 
 
 
