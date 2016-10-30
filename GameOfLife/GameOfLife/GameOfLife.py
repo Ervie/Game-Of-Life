@@ -21,39 +21,46 @@ class GameOfLife(object):
         """Initialize obligatory components"""
        
         self.cellMatrix = []
-       
+        self.nextGenerationMatrix = []
+        self.clock = pygame.time.Clock()
+
         # Calculate rows and columns number
         self.rows = round((self.WINDOW_HEIGHT - self.GRID_OFFSET_X - self.GRID_OFFSET_Y) / (self.CELL_SIZE + 1))
         self.columns = round((self.WINDOW_WIDTH - 2 * self.GRID_OFFSET_X ) / (self.CELL_SIZE + 1))
 
-        self.initMatrix()
+        self.InitMatrix()
 
         pygame.init()
         pygame.display.set_caption("Game Of Life - Bartlomiej Buchala 2016")
 
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         self.screen.fill(self.BACKGROUND_COLOR)
-        self.drawGrid(self.GRID_OFFSET_X, self.GRID_OFFSET_Y)
+        self.DrawGrid(self.GRID_OFFSET_X, self.GRID_OFFSET_Y)
 
-    def start(self):
+    def Start(self):
         """Game starting method."""
         
         pygame.display.flip()
 
         running = True
-        self.setRandomState();
-        self.drawCurrentGeneration();
+        self.SetRandomState();
+        self.DrawCurrentGeneration();
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
-    def initMatrix(self):
-        """Create matrix from calculated rows and colums number"""
+            self.clock.tick(1)
+            self.CalculateNextGeneration()
+            self.DrawCurrentGeneration()
+
+    def InitMatrix(self):
+        """Create matrices from calculated rows and colums number"""
         self.cellMatrix = [[False for i in range(self.columns)] for j in range(self.rows)]
+        self.nextGenerationMatrix = [[False for i in range(self.columns)] for j in range(self.rows)]
 
 
-    def drawGrid(self, offset_x, offset_y):
+    def DrawGrid(self, offset_x, offset_y):
         """Draws board"""
         boardWidth = self.WINDOW_WIDTH - offset_x * 2
         boardHeight = self.WINDOW_HEIGHT - offset_x - offset_y
@@ -84,7 +91,7 @@ class GameOfLife(object):
         # refresh
         pygame.display.flip()
 
-    def drawCurrentGeneration(self):
+    def DrawCurrentGeneration(self):
         """Prints current generation on grid"""
         for r in range(self.rows):
             for c in range(self.columns):
@@ -101,11 +108,10 @@ class GameOfLife(object):
         # refresh
         pygame.display.flip()
 
-    def setRandomState(self):
+    def SetRandomState(self):
         """Randomly sets cell to be dead or alive"""
         aliveProbability = 0.2
-        ;
-
+        
         for c in range(0, self.columns):
             for r in range(0, self.rows):
                 if aliveProbability > random.random():
@@ -113,21 +119,57 @@ class GameOfLife(object):
                 else:
                     self.cellMatrix[r][c] = False
     
-    def resetGrid(self):
+    def ResetGrid(self):
         """Sets all cells to dead"""
         for r in range(self.rows):
             for c in range(self.columns):
                 self.cellMatrix[r][c] = False
 
+    def CalculateNextGeneration(self):
+        """Revive or put cells to death depending on neighbour count"""
+        for row in range(0, self.rows):
+            for column in range(0, self.columns):
 
+                neighbours = self.GetNeighboursCount(row, column)
 
-    def handle_keyboard(self, event):
+                # for alive cells
+                if self.cellMatrix[row][column] == True:
+                    # die of under-popularion or overcrowding
+                    if neighbours < 2 or neighbours > 3:
+                        self.nextGenerationMatrix[row][column] = False
+
+                # for dead cells
+                else :
+                    if neighbours == 3:
+                        self.nextGenerationMatrix[row][column] = True
+
+        # set the matrix to be the new state
+        for row in range(self.rows):
+            for column in range(self.columns):
+                self.cellMatrix[row][column]  = self.nextGenerationMatrix[row][column] 
+    
+    def GetNeighboursCount(self, currentRow, currentColumn):
+        """Calculate count of alive neighbours"""
+        neigboursArray = [(-1,-1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+
+        aliveNeighbours = 0
+		
+        for x,y in neigboursArray:
+            row = currentRow + x
+            column = currentColumn + y
+            if row >= 0 and column >= 0 and row < self.rows and column < self.columns:
+                if self.cellMatrix[row][column] == True:
+                    aliveNeighbours += 1
+
+        return aliveNeighbours
+
+    def HandleKeyboardInput(self, event):
         """Read user input and handles it"""
         if (event.key == pygame.K_ESCAPE or event.key == pygame.K_q):
             pygame.quit()
         elif event.key == pygame.K_r:
             print("Reseting grid.")
-            self.resetGrid()
+            self.ResetGrid()
 
 
 

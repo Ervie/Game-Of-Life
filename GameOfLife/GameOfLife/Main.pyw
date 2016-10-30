@@ -14,7 +14,7 @@ import GameOfLife as GoL
 
 def main():
     game = GoL.GameOfLife()
-    game.start()
+    game.Start()
 
 if __name__ == "__main__":
     main()
