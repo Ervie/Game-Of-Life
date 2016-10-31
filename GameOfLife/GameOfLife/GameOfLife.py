@@ -4,11 +4,11 @@ import random
 class GameOfLife(object):
     """Main class displaying board and handling events"""
 
-    WINDOW_WIDTH = 1280
+    WINDOW_WIDTH = 1300
     WINDOW_HEIGHT = 720
 
-    GRID_OFFSET_X = 80
-    GRID_OFFSET_Y = 150
+    GRID_OFFSET_X = 0
+    GRID_OFFSET_Y = 200
 
     CELL_SIZE = 30
 
@@ -26,7 +26,8 @@ class GameOfLife(object):
 
         # Timer
         self.clock = pygame.time.Clock()
-        self.fps = 10;
+        self.speed = 3;
+        self.fps = 4;
 
         # Calculate rows and columns number
         self.rows = round((self.WINDOW_HEIGHT - self.GRID_OFFSET_X - self.GRID_OFFSET_Y) / (self.CELL_SIZE + 1))
@@ -39,6 +40,7 @@ class GameOfLife(object):
 
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         self.screen.fill(self.BACKGROUND_COLOR)
+        self.DrawText()
         self.DrawGrid(self.GRID_OFFSET_X, self.GRID_OFFSET_Y)
 
     def Start(self):
@@ -69,31 +71,31 @@ class GameOfLife(object):
 
     def DrawGrid(self, offset_x, offset_y):
         """Draws board"""
-        boardWidth = self.WINDOW_WIDTH - offset_x * 2
+        boardWidth = self.WINDOW_WIDTH  #- offset_x * 2
         boardHeight = self.WINDOW_HEIGHT - offset_x - offset_y
 
         black = (200, 200, 200)
         gray = (120, 120, 120)
         
         # draw vertical lines
-        for x in range(offset_x + 10, boardWidth + offset_x, 10):
-            pygame.draw.line(self.screen, black, (x, offset_y), 
-                (x, offset_y + boardHeight), 1)
+        #for x in range(offset_x + 10, boardWidth + offset_x, 10):
+        #    pygame.draw.line(self.screen, black, (x, offset_y), 
+        #        (x, offset_y + boardHeight), 1) 
 
         # draw horizontal lines
-        for y in range(offset_y + 10, boardHeight + offset_y, 10):
-            pygame.draw.line(self.screen, black, (offset_x, y), 
-                (boardWidth + offset_x, y), 1)
+        #for y in range(offset_y + 10, boardHeight + offset_y, 10):
+        #    pygame.draw.line(self.screen, black, (offset_x, y), 
+        #        (boardWidth + offset_x, y), 1)
 
         # draw borders
-        pygame.draw.line(self.screen, gray, (offset_x - 2, offset_y - 1),
-            (offset_x + boardWidth + 2, offset_y - 1), 3)
+        pygame.draw.line(self.screen, gray, (0 , offset_y - 1),
+            (boardWidth, offset_y - 1), 3)
         pygame.draw.line(self.screen, gray, (offset_x - 2, offset_y + 
             boardHeight + 1), (offset_x + boardWidth + 2, offset_y + boardHeight + 1), 3)
         pygame.draw.line(self.screen, gray, (offset_x - 1, offset_y - 1), 
             (offset_x - 1, offset_y + boardHeight + 1), 3)
-        pygame.draw.line(self.screen, gray, (offset_x + boardWidth + 1, 
-            offset_y - 1), (offset_x + 1 + boardWidth, offset_y + boardHeight + 1), 3)
+        pygame.draw.line(self.screen, gray, (0, 
+            offset_y - 1), (boardWidth, offset_y + boardHeight + 1), 3)
 
         # refresh
         pygame.display.flip()
@@ -136,12 +138,14 @@ class GameOfLife(object):
     def ChangeSpeed(self, speedUp):
         """Speed up or slow down generation changing"""
         if speedUp == True:
-            if (self.fps < 60):
-                self.fps *= 2
+            if (self.speed < 5):
+                self.speed += 1
         elif speedUp == False:
-            if (self.fps > 0.2):
-                self.fps /= 2
-        print(self.clock.get_fps())
+            if (self.speed > 0):
+                self.speed -= 1
+
+        self.fps = pow(2, self.speed)
+        print(self.speed)
 
     def CalculateNextGeneration(self):
         """Revive or put cells to death depending on neighbour count"""
@@ -181,6 +185,28 @@ class GameOfLife(object):
 
         return aliveNeighbours
 
+    def DrawText(self):
+        """Write information about inpu and current modificators"""
+
+        titleText = "Game of Life"
+        helpText = ['Sterowanie:',
+            'R - resetowanie planszy', 
+            'D - losowy układ', 
+            'S - zatrzymanie/wznowienie',
+            'Up/Down - zmiana tempa',
+            'Q - wyjście']
+        
+        font = pygame.font.SysFont('Harrington', 70, True)
+        text = font.render(titleText, 1, (255, 0, 0))
+        self.screen.blit(text, (350, 0))
+
+        font = pygame.font.SysFont('DejaVu Sans Mono', 30)
+        offset_y = 30
+        for line in helpText:
+            text = font.render(line, True, (120, 155, 220))
+            self.screen.blit(text, (50, offset_y))
+            offset_y += 25
+
     def HandleKeyboardInput(self, event):
         """Read user input and handles it"""
         if (event.key == pygame.K_ESCAPE or event.key == pygame.K_q):
@@ -193,10 +219,10 @@ class GameOfLife(object):
             self.SetRandomState()
         elif event.key == pygame.K_s:
             if self.paused == False:
-                print("Game resumed.")
+                print("Game stopped..")
                 self.paused = True
             else:
-                print("Game stopped")
+                print("Game resumed.")
                 self.paused = False
         elif event.key == pygame.K_UP:
             print("Speed up")
