@@ -1,5 +1,6 @@
 ﻿import pygame
 import random
+import math as math
 
 class GameOfLife(object):
     """Main class displaying board and handling events"""
@@ -8,7 +9,7 @@ class GameOfLife(object):
     WINDOW_HEIGHT = 720
 
     GRID_OFFSET_X = 0
-    GRID_OFFSET_Y = 200
+    GRID_OFFSET_Y = 192
 
     CELL_SIZE = 30
 
@@ -58,6 +59,8 @@ class GameOfLife(object):
                     pygame.QUIT
                 elif event.type == pygame.KEYDOWN:
                     self.HandleKeyboardInput(event)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    self.HandleMouseInput()
             
             self.DrawCurrentGeneration()
             if (self.paused == False):
@@ -122,6 +125,7 @@ class GameOfLife(object):
                 self.cellMatrix[r][c] = False
                 self.nextGenerationMatrix[r][c] = False
         self.generationCounter = 0;
+        self.paused = True
 
     def ChangeSpeed(self, speedUp):
         """Speed up or slow down generation changing"""
@@ -147,6 +151,9 @@ class GameOfLife(object):
                     # die of under-popularion or overcrowding
                     if neighbours < 2 or neighbours > 3:
                         self.nextGenerationMatrix[row][column] = False
+                    else:
+                        self.nextGenerationMatrix[row][column] = True
+
 
                 # for dead cells
                 else :
@@ -182,8 +189,8 @@ class GameOfLife(object):
         controlsText = ['Sterowanie:',
             'R - resetowanie planszy', 
             'D - losowy układ', 
-            'S - zatrzymanie/wznowienie',
-            'Up/Down - zmiana tempa',
+            'S/Spacja - zatrzymanie/wznowienie',
+            'Up/Down - zmiana tempa, Right - przejście o 1 generację',
             'Q - wyjście']
         configText = ['Obecne ustawienia:',
             'Tempo: ', 
@@ -211,7 +218,7 @@ class GameOfLife(object):
         """Updates text which changes during game"""
 
         font = pygame.font.SysFont('DejaVu Sans Mono', 30)
-        offset_y = 30
+        offset_y = 55
         
         # draw empty rectangle over old text
         rect = (1200, offset_y, 1250, offset_y + 20)
@@ -240,7 +247,7 @@ class GameOfLife(object):
         elif event.key == pygame.K_d:
             print("Randomizing grid.")
             self.SetRandomState()
-        elif event.key == pygame.K_s:
+        elif event.key == pygame.K_s or event.key == pygame.K_SPACE:
             if self.paused == False:
                 print("Game stopped..")
                 self.paused = True
@@ -253,7 +260,40 @@ class GameOfLife(object):
         elif event.key == pygame.K_DOWN:
             print("Slow down")
             self.ChangeSpeed(False)
+        elif event.key == pygame.K_RIGHT:
+            print("Advance 1 generation")
+            self.paused = True;
+            self.CalculateNextGeneration()
 
+    def HandleMouseInput(self):
+        """Handle user clicks"""
+
+        # mouse position when clicked
+        x_mouse, y_mouse = pygame.mouse.get_pos()
+
+        # event outside the cell borders, ignore it
+        if (x_mouse > self.WINDOW_WIDTH
+            or y_mouse > self.WINDOW_HEIGHT - self.GRID_OFFSET_X
+            or x_mouse < self.GRID_OFFSET_X or y_mouse < self.GRID_OFFSET_Y):
+            Return
+
+        cellWithBorderSize = self.CELL_SIZE + 1
+
+        # calculate indexes
+        index_x = math.floor((x_mouse - self.GRID_OFFSET_X) / cellWithBorderSize)
+        index_y = math.floor((y_mouse - self.GRID_OFFSET_Y) / cellWithBorderSize)
+        off_x = x_mouse / cellWithBorderSize * cellWithBorderSize
+        off_y =  y_mouse / cellWithBorderSize * cellWithBorderSize
+        rect = (off_x, off_y, self.CELL_SIZE, self.CELL_SIZE)
+
+
+        if self.cellMatrix[index_y][index_x] == True:
+            #pygame.draw.rect(self.screen, self.DEAD_COLOR, rect)
+            self.cellMatrix[index_y][index_x] = False
+        else:
+            #pygame.draw.rect(self.screen, self.ALIVE_COLOR, rect)
+            self.cellMatrix[index_y][index_x] = True
+        #pygame.display.flip()
 
 
     
