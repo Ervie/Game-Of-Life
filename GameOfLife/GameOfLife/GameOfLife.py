@@ -34,6 +34,7 @@ class GameOfLife(object):
         self.columns = round((self.WINDOW_WIDTH - 2 * self.GRID_OFFSET_X ) / (self.CELL_SIZE + 1))
 
         self.InitMatrix()
+        self.generationCounter = 0
 
         pygame.init()
         pygame.display.set_caption("Game Of Life - Bartlomiej Buchala 2016")
@@ -57,11 +58,11 @@ class GameOfLife(object):
                     pygame.QUIT
                 elif event.type == pygame.KEYDOWN:
                     self.HandleKeyboardInput(event)
-
+            
+            self.DrawCurrentGeneration()
             if (self.paused == False):
                 self.clock.tick(self.fps)
                 self.CalculateNextGeneration()
-                self.DrawCurrentGeneration()
 
     def InitMatrix(self):
         """Create matrices from calculated rows and colums number"""
@@ -76,26 +77,7 @@ class GameOfLife(object):
 
         black = (200, 200, 200)
         gray = (120, 120, 120)
-        
-        # draw vertical lines
-        #for x in range(offset_x + 10, boardWidth + offset_x, 10):
-        #    pygame.draw.line(self.screen, black, (x, offset_y), 
-        #        (x, offset_y + boardHeight), 1) 
 
-        # draw horizontal lines
-        #for y in range(offset_y + 10, boardHeight + offset_y, 10):
-        #    pygame.draw.line(self.screen, black, (offset_x, y), 
-        #        (boardWidth + offset_x, y), 1)
-
-        # draw borders
-        pygame.draw.line(self.screen, gray, (0 , offset_y - 1),
-            (boardWidth, offset_y - 1), 3)
-        pygame.draw.line(self.screen, gray, (offset_x - 2, offset_y + 
-            boardHeight + 1), (offset_x + boardWidth + 2, offset_y + boardHeight + 1), 3)
-        pygame.draw.line(self.screen, gray, (offset_x - 1, offset_y - 1), 
-            (offset_x - 1, offset_y + boardHeight + 1), 3)
-        pygame.draw.line(self.screen, gray, (0, 
-            offset_y - 1), (boardWidth, offset_y + boardHeight + 1), 3)
 
         # refresh
         pygame.display.flip()
@@ -114,6 +96,9 @@ class GameOfLife(object):
                     pygame.draw.rect(self.screen, self.ALIVE_COLOR, rect)
                 elif self.cellMatrix[r][c] == False:
                     pygame.draw.rect(self.screen, self.DEAD_COLOR, rect)
+
+        # draw updated text as well
+        self.UpdateText()
         # refresh
         pygame.display.flip()
 
@@ -127,6 +112,8 @@ class GameOfLife(object):
                     self.cellMatrix[r][c] = True
                 else:
                     self.cellMatrix[r][c] = False
+
+        self.generationCounter = 0;
     
     def ResetGrid(self):
         """Sets all cells to dead"""
@@ -134,6 +121,7 @@ class GameOfLife(object):
             for c in range(0, self.columns):
                 self.cellMatrix[r][c] = False
                 self.nextGenerationMatrix[r][c] = False
+        self.generationCounter = 0;
 
     def ChangeSpeed(self, speedUp):
         """Speed up or slow down generation changing"""
@@ -169,6 +157,8 @@ class GameOfLife(object):
         for row in range(self.rows):
             for column in range(self.columns):
                 self.cellMatrix[row][column]  = self.nextGenerationMatrix[row][column] 
+
+        self.generationCounter += 1;
     
     def GetNeighboursCount(self, currentRow, currentColumn):
         """Calculate count of alive neighbours"""
@@ -189,12 +179,15 @@ class GameOfLife(object):
         """Write information about inpu and current modificators"""
 
         titleText = "Game of Life"
-        helpText = ['Sterowanie:',
+        controlsText = ['Sterowanie:',
             'R - resetowanie planszy', 
             'D - losowy układ', 
             'S - zatrzymanie/wznowienie',
             'Up/Down - zmiana tempa',
             'Q - wyjście']
+        configText = ['Obecne ustawienia:',
+            'Tempo: ', 
+            'Obecna generacja:']
         
         font = pygame.font.SysFont('Harrington', 70, True)
         text = font.render(titleText, 1, (255, 0, 0))
@@ -202,10 +195,40 @@ class GameOfLife(object):
 
         font = pygame.font.SysFont('DejaVu Sans Mono', 30)
         offset_y = 30
-        for line in helpText:
+
+        for line in controlsText:
             text = font.render(line, True, (120, 155, 220))
             self.screen.blit(text, (50, offset_y))
             offset_y += 25
+
+        offset_y = 30
+        for line in configText:
+            text = font.render(line, True, (120, 155, 220))
+            self.screen.blit(text, (1000, offset_y))
+            offset_y += 25
+
+    def UpdateText(self):
+        """Updates text which changes during game"""
+
+        font = pygame.font.SysFont('DejaVu Sans Mono', 30)
+        offset_y = 30
+        
+        # draw empty rectangle over old text
+        rect = (1200, offset_y, 1250, offset_y + 20)
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, rect)
+
+        # Tempo
+        text = font.render(str(self.speed), True, (120, 155, 220))
+        self.screen.blit(text, (1200, offset_y))
+        offset_y += 25
+
+        # Generation counter
+
+        rect = (1200, offset_y, 1250, offset_y + 20)
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, rect)
+
+        text = font.render(str(self.generationCounter), True, (120, 155, 220))
+        self.screen.blit(text, (1200, offset_y))
 
     def HandleKeyboardInput(self, event):
         """Read user input and handles it"""
