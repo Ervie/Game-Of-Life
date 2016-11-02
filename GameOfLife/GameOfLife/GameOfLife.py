@@ -52,14 +52,15 @@ class GameOfLife(object):
         """Game starting method."""
         
         pygame.display.flip()
-
+        
+        self.gameUp = True
         self.paused = False
         self.SetRandomState();
         self.DrawCurrentGeneration();
-        while 1:
+        while self.gameUp == True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.QUIT
+                    self.gameUp = False
                 elif event.type == pygame.KEYDOWN:
                     self.HandleKeyboardInput(event)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -267,7 +268,7 @@ class GameOfLife(object):
     def HandleKeyboardInput(self, event):
         """Read user input and handles it"""
         if (event.key == pygame.K_ESCAPE or event.key == pygame.K_q):
-            pygame.quit()
+            self.gameUp = False
         elif event.key == pygame.K_r:
             print("Reseting grid.")
             self.ResetGrid()
