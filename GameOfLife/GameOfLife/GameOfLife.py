@@ -30,6 +30,9 @@ class GameOfLife(object):
         self.speed = 3;
         self.fps = 4;
 
+        # Border modificator
+        self.bordersUp = True
+
         # Calculate rows and columns number
         self.rows = round((self.WINDOW_HEIGHT - self.GRID_OFFSET_X - self.GRID_OFFSET_Y) / (self.CELL_SIZE + 1))
         self.columns = round((self.WINDOW_WIDTH - 2 * self.GRID_OFFSET_X ) / (self.CELL_SIZE + 1))
@@ -173,11 +176,19 @@ class GameOfLife(object):
 
         aliveNeighbours = 0
 		
-        for x,y in neigboursArray:
-            row = currentRow + x
-            column = currentColumn + y
-            if row >= 0 and column >= 0 and row < self.rows and column < self.columns:
-                if self.cellMatrix[row][column] == True:
+        if self.bordersUp == True:
+            for x,y in neigboursArray:
+                row = currentRow + x
+                column = currentColumn + y
+                if row >= 0 and column >= 0 and row < self.rows and column < self.columns:
+                    if self.cellMatrix[row][column] == True:
+                        aliveNeighbours += 1
+        else:
+            for x,y in neigboursArray:
+                row = currentRow + x
+                column = currentColumn + y
+                
+                if self.cellMatrix[row % self.rows][column % self.columns] == True:
                     aliveNeighbours += 1
 
         return aliveNeighbours
@@ -190,35 +201,37 @@ class GameOfLife(object):
             'R - resetowanie planszy', 
             'D - losowy układ', 
             'S/Spacja - zatrzymanie/wznowienie',
+            'B - aktywacja/dezaktywacja ścian',
             'Up/Down - zmiana tempa, Right - przejście o 1 generację',
             'Q - wyjście']
         configText = ['Obecne ustawienia:',
             'Tempo: ', 
-            'Obecna generacja:']
+            'Obecna generacja:',
+            'Ściany:']
         
         font = pygame.font.SysFont('Harrington', 70, True)
         text = font.render(titleText, 1, (255, 0, 0))
         self.screen.blit(text, (350, 0))
 
-        font = pygame.font.SysFont('DejaVu Sans Mono', 30)
-        offset_y = 30
+        font = pygame.font.SysFont('DejaVu Sans Mono', 20)
+        offset_y = 20
 
         for line in controlsText:
             text = font.render(line, True, (120, 155, 220))
-            self.screen.blit(text, (50, offset_y))
-            offset_y += 25
+            self.screen.blit(text, (20, offset_y))
+            offset_y += 20
 
-        offset_y = 30
+        offset_y = 20
         for line in configText:
             text = font.render(line, True, (120, 155, 220))
             self.screen.blit(text, (1000, offset_y))
-            offset_y += 25
+            offset_y += 20
 
     def UpdateText(self):
         """Updates text which changes during game"""
 
-        font = pygame.font.SysFont('DejaVu Sans Mono', 30)
-        offset_y = 55
+        font = pygame.font.SysFont('DejaVu Sans Mono', 25)
+        offset_y = 40
         
         # draw empty rectangle over old text
         rect = (1200, offset_y, 1250, offset_y + 20)
@@ -227,7 +240,7 @@ class GameOfLife(object):
         # Tempo
         text = font.render(str(self.speed), True, (120, 155, 220))
         self.screen.blit(text, (1200, offset_y))
-        offset_y += 25
+        offset_y += 20
 
         # Generation counter
 
@@ -235,6 +248,20 @@ class GameOfLife(object):
         pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, rect)
 
         text = font.render(str(self.generationCounter), True, (120, 155, 220))
+        self.screen.blit(text, (1200, offset_y))
+        offset_y += 20
+
+        # BorderMode
+
+        if self.bordersUp == True:
+            borderText = "Aktywne"
+        else:
+            borderText = "Nieaktywne"
+
+        rect = (1200, offset_y, 1250, offset_y + 20)
+        pygame.draw.rect(self.screen, self.BACKGROUND_COLOR, rect)
+
+        text = font.render(borderText, True, (120, 155, 220))
         self.screen.blit(text, (1200, offset_y))
 
     def HandleKeyboardInput(self, event):
@@ -247,9 +274,16 @@ class GameOfLife(object):
         elif event.key == pygame.K_d:
             print("Randomizing grid.")
             self.SetRandomState()
+        elif event.key == pygame.K_b:
+            if self.bordersUp == False:
+                print("Borders up.")
+                self.bordersUp = True
+            else:
+                print("Borders down.")
+                self.bordersUp = False
         elif event.key == pygame.K_s or event.key == pygame.K_SPACE:
             if self.paused == False:
-                print("Game stopped..")
+                print("Game stopped.")
                 self.paused = True
             else:
                 print("Game resumed.")
@@ -275,7 +309,7 @@ class GameOfLife(object):
         if (x_mouse > self.WINDOW_WIDTH
             or y_mouse > self.WINDOW_HEIGHT - self.GRID_OFFSET_X
             or x_mouse < self.GRID_OFFSET_X or y_mouse < self.GRID_OFFSET_Y):
-            Return
+            return 0
 
         cellWithBorderSize = self.CELL_SIZE + 1
 
@@ -288,12 +322,9 @@ class GameOfLife(object):
 
 
         if self.cellMatrix[index_y][index_x] == True:
-            #pygame.draw.rect(self.screen, self.DEAD_COLOR, rect)
             self.cellMatrix[index_y][index_x] = False
         else:
-            #pygame.draw.rect(self.screen, self.ALIVE_COLOR, rect)
             self.cellMatrix[index_y][index_x] = True
-        #pygame.display.flip()
 
 
     
