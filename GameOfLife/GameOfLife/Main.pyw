@@ -1,20 +1,15 @@
 ﻿import pygame
-import GameOfLife as GoL
-
-
-#background_color = (255, 255, 255)
-#(width, height) = (1920,1080)
-
-#screen = pygame.display.set_mode((width, height))
-#pygame.display.set_caption('Game Of Life - Bartlomiej Buchala 2016')
-#screen.fill(background_color)
-
-#pygame.display.flip()
-
+import GameOfLife2D as GoL2D
+import GameOfLife3D as GoL3d
+import sys
 
 def main():
-    game = GoL.GameOfLife()
-    game.Start()
+    if (len(sys.argv) < 1 or sys.argv[1] == '2'):
+        game = GoL2D.GameOfLife2D()
+        game.Start()
+    else:
+        game = GoL3d.GameOfLife3D()
+        game.Start()
 
 if __name__ == "__main__":
     main()

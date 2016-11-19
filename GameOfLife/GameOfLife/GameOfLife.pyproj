@@ -12,6 +12,9 @@
     <OutputPath>.</OutputPath>
     <Name>GameOfLife</Name>
     <RootNamespace>GameOfLife</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments>3</CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +25,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="GameOfLife.py">
+    <Compile Include="GameOfLife2D.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GameOfLife3D.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Main.pyw" />

@@ -2,7 +2,7 @@
 import random
 import math as math
 
-class GameOfLife(object):
+class GameOfLife2D(object):
     """Main class displaying board and handling events"""
 
     WINDOW_WIDTH = 1300
@@ -34,8 +34,8 @@ class GameOfLife(object):
         self.bordersUp = True
 
         # Calculate rows and columns number
-        self.rows = round((self.WINDOW_HEIGHT - self.GRID_OFFSET_X - self.GRID_OFFSET_Y) / (self.CELL_SIZE + 1))
-        self.columns = round((self.WINDOW_WIDTH - 2 * self.GRID_OFFSET_X ) / (self.CELL_SIZE + 1))
+        self.rows = int(round((self.WINDOW_HEIGHT - self.GRID_OFFSET_X - self.GRID_OFFSET_Y) / (self.CELL_SIZE + 1)))
+        self.columns = int(round((self.WINDOW_WIDTH - 2 * self.GRID_OFFSET_X ) / (self.CELL_SIZE + 1)))
 
         self.InitMatrix()
         self.generationCounter = 0
@@ -73,8 +73,8 @@ class GameOfLife(object):
 
     def InitMatrix(self):
         """Create matrices from calculated rows and colums number"""
-        self.cellMatrix = [[False for i in range(self.columns)] for j in range(self.rows)]
-        self.nextGenerationMatrix = [[False for i in range(self.columns)] for j in range(self.rows)]
+        self.cellMatrix = [[False for i in xrange(self.columns)] for j in xrange(self.rows)]
+        self.nextGenerationMatrix = [[False for i in xrange(self.columns)] for j in xrange(self.rows)]
 
 
     def DrawGrid(self, offset_x, offset_y):
@@ -91,8 +91,8 @@ class GameOfLife(object):
 
     def DrawCurrentGeneration(self):
         """Prints current generation on grid"""
-        for r in range(self.rows):
-            for c in range(self.columns):
+        for r in xrange(self.rows):
+            for c in xrange(self.columns):
 
                 # rectangle of cell to fill
                 rect = (c * (self.CELL_SIZE + 1)  + self.GRID_OFFSET_X + 1, 
@@ -113,8 +113,8 @@ class GameOfLife(object):
         """Randomly sets cell to be dead or alive"""
         aliveProbability = 0.2
         
-        for c in range(0, self.columns):
-            for r in range(0, self.rows):
+        for c in xrange(0, self.columns):
+            for r in xrange(0, self.rows):
                 if aliveProbability > random.random():
                     self.cellMatrix[r][c] = True
                 else:
@@ -124,8 +124,8 @@ class GameOfLife(object):
     
     def ResetGrid(self):
         """Sets all cells to dead"""
-        for r in range(0, self.rows):
-            for c in range(0, self.columns):
+        for r in xrange(0, self.rows):
+            for c in xrange(0, self.columns):
                 self.cellMatrix[r][c] = False
                 self.nextGenerationMatrix[r][c] = False
         self.generationCounter = 0;
@@ -145,8 +145,8 @@ class GameOfLife(object):
 
     def CalculateNextGeneration(self):
         """Revive or put cells to death depending on neighbour count"""
-        for row in range(0, self.rows):
-            for column in range(0, self.columns):
+        for row in xrange(0, self.rows):
+            for column in xrange(0, self.columns):
 
                 neighbours = self.GetNeighboursCount(row, column)
 
@@ -165,8 +165,8 @@ class GameOfLife(object):
                         self.nextGenerationMatrix[row][column] = True
 
         # set the matrix to be the new state
-        for row in range(self.rows):
-            for column in range(self.columns):
+        for row in xrange(self.rows):
+            for column in xrange(self.columns):
                 self.cellMatrix[row][column]  = self.nextGenerationMatrix[row][column] 
 
         self.generationCounter += 1;
@@ -200,15 +200,15 @@ class GameOfLife(object):
         titleText = "Game of Life"
         controlsText = ['Sterowanie:',
             'R - resetowanie planszy', 
-            'D - losowy układ', 
+            'D - losowy uklad', 
             'S/Spacja - zatrzymanie/wznowienie',
-            'B - aktywacja/dezaktywacja ścian',
-            'Up/Down - zmiana tempa, Right - przejście o 1 generację',
-            'Q - wyjście']
+            'B - aktywacja/dezaktywacja scian',
+            'Up/Down - zmiana tempa, Right - przejscie o 1 generacje',
+            'Q - wyjscie']
         configText = ['Obecne ustawienia:',
             'Tempo: ', 
             'Obecna generacja:',
-            'Ściany:']
+            'Sciany:']
         
         font = pygame.font.SysFont('Harrington', 70, True)
         text = font.render(titleText, 1, (255, 0, 0))
@@ -303,6 +303,9 @@ class GameOfLife(object):
     def HandleMouseInput(self):
         """Handle user clicks"""
 
+        if (not pygame.MOUSEBUTTONDOWN):
+            return 0
+
         # mouse position when clicked
         x_mouse, y_mouse = pygame.mouse.get_pos()
 
@@ -315,8 +318,8 @@ class GameOfLife(object):
         cellWithBorderSize = self.CELL_SIZE + 1
 
         # calculate indexes
-        index_x = math.floor((x_mouse - self.GRID_OFFSET_X) / cellWithBorderSize)
-        index_y = math.floor((y_mouse - self.GRID_OFFSET_Y) / cellWithBorderSize)
+        index_x = int(math.floor((x_mouse - self.GRID_OFFSET_X) / cellWithBorderSize))
+        index_y = int(math.floor((y_mouse - self.GRID_OFFSET_Y) / cellWithBorderSize))
         off_x = x_mouse / cellWithBorderSize * cellWithBorderSize
         off_y =  y_mouse / cellWithBorderSize * cellWithBorderSize
         rect = (off_x, off_y, self.CELL_SIZE, self.CELL_SIZE)
