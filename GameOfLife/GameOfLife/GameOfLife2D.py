@@ -79,7 +79,7 @@ class GameOfLife2D(object):
 
     def DrawGrid(self, offset_x, offset_y):
         """Draws board"""
-        boardWidth = self.WINDOW_WIDTH  #- offset_x * 2
+        boardWidth = self.WINDOW_WIDTH
         boardHeight = self.WINDOW_HEIGHT - offset_x - offset_y
 
         black = (200, 200, 200)
