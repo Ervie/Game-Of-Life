@@ -13,9 +13,9 @@ class GameOfLife3D(object):
         self.nextGenerationMatrix = []
 
         # number of elements in dimensions
-        self.columns = 10
-        self.rows = 10
-        self.layers = 10
+        self.columns = 5
+        self.rows = 5
+        self.layers = 5
         
         
         self.InitMatrix()
@@ -26,9 +26,19 @@ class GameOfLife3D(object):
     def Start(self):
         """Game starting method."""
 
-        #while(True):
-            # TODO: Pętelka
-            # self.DrawCurrentGeneration()
+        self.SetRandomState()
+        self.gameUp = True
+        self.paused = False
+
+        while(self.gameUp):
+            rate(1)
+            if scene.kb.keys:
+                key = scene.kb.getkey()
+                HandleKeyboardInput(key)
+            self.DrawCurrentGeneration()
+
+            if (self.paused == False):
+                self.CalculateNextGeneration()
 
     def InitMatrix(self):
         """Create matrices from calculated rows and colums number"""
@@ -44,6 +54,15 @@ class GameOfLife3D(object):
                 for k in xrange(self.layers):
                     box(pos = (i * 1.3,j * 1.3,k * 1.3), length = 0.5, width = 0.5, height = 0.5, color = color.black)
 
+    def ResetGrid(self):
+        """Sets all cells to dead"""
+        for r in xrange(0, self.rows):
+            for c in xrange(0, self.columns):
+                for l in xrange(0, self.layers):
+                    self.cellMatrix[r][c][l] = False
+                    self.nextGenerationMatrix[r][c][l] = False
+        self.generationCounter = 0;
+        self.paused = True
 
     def SetRandomState(self):
         """Randomly sets cell to be dead or alive"""
@@ -70,3 +89,69 @@ class GameOfLife3D(object):
                     else:
                         box(pos = (r * 1.3,c * 1.3,l * 1.3), length = 0.5, width = 0.5, height = 0.5, color = color.red)
 
+
+
+    def CalculateNextGeneration(self):
+        """Revive or put cells to death depending on neighbour count"""
+        for row in xrange(0, self.rows):
+            for column in xrange(0, self.columns):
+                for layer in xrange(0, self.layers):
+
+                    neighbours = self.GetNeighboursCount(row, column, layer)
+
+                    # for alive cells
+                    if self.cellMatrix[row][column][layer] == True:
+                        # die of under-popularion or overcrowding
+                        if neighbours < 2 or neighbours > 3:
+                            self.nextGenerationMatrix[row][column][layer] = False
+                        else:
+                            self.nextGenerationMatrix[row][column][layer] = True
+
+
+                    # for dead cells
+                    else :
+                        if neighbours == 3:
+                            self.nextGenerationMatrix[row][column][layer] = True
+
+        # set the matrix to be the new state
+        for row in xrange(self.rows):
+            for column in xrange(self.columns):
+                for layer in xrange(self.layers):
+                    self.cellMatrix[row][column][layer]  = self.nextGenerationMatrix[row][column][layer] 
+
+        self.generationCounter += 1;
+
+    def GetNeighboursCount(self, currentRow, currentColumn, currentLayer):
+        """Calculate count of alive neighbours"""
+        neigboursArray = [(-1,-1, -1), (-1, 0, -1), (-1, 1, -1), (0, -1, -1), (0, 1, -1), (1, -1, -1), (1, 0, -1), (1, 1, -1), (0, 0, -1),
+                          (-1,-1,0), (-1, 0,0), (-1, 1,0), (0, -1,0), (0, 1,0), (1, -1,0), (1, 0,0), (1, 1,0),
+                          (-1,-1, 1), (-1, 0, 1), (-1, 1, 1), (0, -1, 1), (0, 1, 1), (1, -1, 1), (1, 0, 1), (1, 1, 1), (0, 0, 1)]
+
+        aliveNeighbours = 0
+		
+        for x,y,z in neigboursArray:
+            row = currentRow + x
+            column = currentColumn + y
+            layer = currentLayer + z
+            if row >= 0 and column >= 0 and layer > 0 and row < self.rows and column < self.columns and layer < self.layers:
+                if self.cellMatrix[row][column][layer] == True:
+                    aliveNeighbours += 1
+
+        return aliveNeighbours
+
+    def HandleKeyboardInput(self, key):
+        """Read user input and handles it"""
+        if (key == 'q'):
+            self.gameUp = False
+        elif event.key == pygame.K_r:
+            self.ResetGrid()
+        elif event.key == pygame.K_d:
+            self.SetRandomState()
+        elif event.key == pygame.K_s or event.key == pygame.K_SPACE:
+            if self.paused == False:
+                self.paused = True
+            else:
+                self.paused = False
+        elif event.key == pygame.K_RIGHT:
+            self.paused = True;
+            self.CalculateNextGeneration()
